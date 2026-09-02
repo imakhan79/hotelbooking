@@ -6,7 +6,7 @@ const ROLE_GATED_PREFIXES: Record<string, string> = {
   "/admin": "admin",
 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request);
 
   const pathname = request.nextUrl.pathname;
