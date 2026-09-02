@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getCurrentUserRoles } from "@/lib/services/auth.service";
+import { listPropertiesForAdmin } from "@/lib/services/property.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = { title: "Admin" };
@@ -25,12 +27,15 @@ export default async function AdminPage() {
     );
   }
 
+  const pendingProperties = await listPropertiesForAdmin("pending");
+
   return (
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold">Admin dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Platform-wide metrics populate once properties and bookings exist (Phase 2+).
+          {pendingProperties.length} {pendingProperties.length === 1 ? "property" : "properties"}{" "}
+          awaiting review.
         </p>
       </div>
 
@@ -61,10 +66,13 @@ export default async function AdminPage() {
           <CardHeader>
             <CardTitle>Property management</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-2">
             <p className="text-sm text-muted-foreground">
-              Approve, reject, and moderate listings once Phase 2 ships.
+              Approve, reject, and moderate listings.
             </p>
+            <Link href="/admin/properties" className="text-sm underline underline-offset-4 w-fit">
+              Review properties
+            </Link>
           </CardContent>
         </Card>
       </div>
