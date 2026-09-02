@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { searchProperties } from "@/lib/services/search.service";
+import { searchParamsSchema } from "@/lib/validation/search";
 import { HeroSearch } from "@/components/hero-search";
+import { PropertyCard } from "@/components/property/property-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -15,8 +18,12 @@ export default async function HomePage() {
   const supabase = await createClient();
   const { data: propertyTypes } = await supabase
     .from("property_types")
-    .select("slug, name")
+    .select("id, slug, name")
     .order("sort_order");
+
+  const { results: newestProperties } = await searchProperties(
+    searchParamsSchema.parse({ sort: "newest" }),
+  );
 
   return (
     <>
@@ -35,11 +42,13 @@ export default async function HomePage() {
         {propertyTypes && propertyTypes.length > 0 ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
             {propertyTypes.map((type) => (
-              <Card key={type.slug} className="text-center">
-                <CardContent className="p-4">
-                  <p className="text-sm font-medium">{type.name}</p>
-                </CardContent>
-              </Card>
+              <Link key={type.slug} href={`/search?types=${type.id}`}>
+                <Card className="text-center transition-colors hover:bg-muted/40">
+                  <CardContent className="p-4">
+                    <p className="text-sm font-medium">{type.name}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (
@@ -48,6 +57,22 @@ export default async function HomePage() {
           </p>
         )}
       </section>
+
+      {newestProperties.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Recently added stays</h2>
+            <Link href="/search" className="text-sm underline underline-offset-4">
+              See all
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {newestProperties.slice(0, 4).map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <h2 className="mb-6 text-xl font-semibold">Why book with us?</h2>

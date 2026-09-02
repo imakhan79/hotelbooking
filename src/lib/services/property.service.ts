@@ -253,6 +253,17 @@ export async function deleteRoomMedia(mediaId: string) {
   await supabase.storage.from("room-photos").remove([data.storage_path]);
 }
 
+export async function getHostProfile(hostId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("full_name, avatar_url")
+    .eq("id", hostId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 // --- Admin ---
 
 export async function listPropertiesForAdmin(status?: string) {
